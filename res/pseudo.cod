@@ -1,0 +1,8 @@
+Inicio
+	Variables
+		a, b, c: entero
+	Leer a
+	Leer b
+	c <- a + b
+	Escribir c
+Fin

@@ -1,0 +1,6 @@
+[package]
+name = "pseudoc"
+version = "0.1.0"
+authors = ["root13"]
+
+[dependencies]
