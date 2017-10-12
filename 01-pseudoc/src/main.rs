@@ -3,13 +3,21 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::io::BufRead;
 
+fn get_file_buffer(path: &str) -> BufReader<File> {
+	let input = File::open(path).expect("Unable to open");
+	BufReader::new(input)
+}
+
+fn get_output_file(path: &str) -> File {
+	File::create(path).expect("Couldn't open write file")
+}
+
 fn main() {
-	let input = File::open("../res/pseudo.cod").expect("Unable to open");
-	let mut output = File::create("out/main.cpp").expect("Couldn't open write file");
+	let file = get_file_buffer("../res/pseudo.cod");
+	let mut output = get_output_file("out/main.cpp");
 
 	writeln!(output, "#include <iostream>\nusing namespace std;\n").expect("Error writing in file");
 
-	let file = BufReader::new(&input);
 	let mut line_it = file.lines();
 
 	{
