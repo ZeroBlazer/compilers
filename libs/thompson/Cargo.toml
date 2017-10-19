@@ -1,0 +1,9 @@
+[package]
+name = "thompson"
+version = "0.1.0"
+authors = ["Elías Puma <elpumitaelias@gmail.com>"]
+
+[dependencies]
+posfixer = { path = "../posfixer/" }
+serde = "1.0.15"
+serde_derive = "1.*"
