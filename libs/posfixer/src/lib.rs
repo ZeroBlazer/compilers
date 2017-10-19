@@ -120,11 +120,11 @@ pub fn posfix(in_path: &str, out_path: &str) -> bool {
     let line = input.lines().next().unwrap().unwrap();
     let terms: Vec<&str> = line.split_whitespace().collect();
 
-    println!("{:?}", out);
-    println!("{:?}", heap);
+    // println!("{:?}", out);
+    // println!("{:?}", heap);
 
     for term in &terms {
-        print!("{:?}: ", eval_term(term));
+        // print!("{:?}: ", eval_term(term));
         match eval_term(term) {
             Number => {
                 out.push(String::from(*term));
