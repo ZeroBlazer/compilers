@@ -1,0 +1,11 @@
+[root]
+name = "thompson"
+version = "0.1.0"
+dependencies = [
+ "posfixer 0.1.0",
+]
+
+[[package]]
+name = "posfixer"
+version = "0.1.0"
+
