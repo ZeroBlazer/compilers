@@ -31,55 +31,25 @@ fn greater_eq_precedence(term1: &str, term2: &String) -> bool {
         true
     } else {
         match term1 {
-            "*" => {
-                match term2.as_ref(): &str {
-                    "*" => {
-                        true
-                    }
-                    "." => {
-                        false
-                    }
-                    "+" => {
-                        false
-                    }
-                    _ => {
-                        false
-                    }
-                }
-            }
-            "." => {
-                match term2.as_ref(): &str {
-                    "*" => {
-                        true
-                    }
-                    "." => {
-                        true
-                    }
-                    "+" => {
-                        false
-                    }
-                    _ => {
-                        false
-                    }
-                }
-            }
-            "+" => {
-                match term2.as_ref(): &str {
-                    "*" => {
-                        true
-                    }
-                    "." => {
-                        true
-                    }
-                    "+" => {
-                        true
-                    }
-                    _ => {
-                        false
-                    }
-                }
-            }
-            _ => false
+            "*" => match term2.as_ref(): &str {
+                "*" => true,
+                "." => false,
+                "+" => false,
+                _ => false,
+            },
+            "." => match term2.as_ref(): &str {
+                "*" => true,
+                "." => true,
+                "+" => false,
+                _ => false,
+            },
+            "+" => match term2.as_ref(): &str {
+                "*" => true,
+                "." => true,
+                "+" => true,
+                _ => false,
+            },
+            _ => false,
         }
     }
 }
@@ -150,7 +120,7 @@ pub fn posfix(in_path: &str, out_path: &str) -> bool {
                 }
             }
             Operator => {
-                while !heap.is_empty() && greater_eq_precedence(term, &heap.last().unwrap())  {
+                while !heap.is_empty() && greater_eq_precedence(term, &heap.last().unwrap()) {
                     out.push(heap.pop().unwrap());
                 }
                 heap.push(String::from(*term));
@@ -162,7 +132,7 @@ pub fn posfix(in_path: &str, out_path: &str) -> bool {
         // println!("{:?}", heap);
     }
 
-    while !heap.is_empty()  {
+    while !heap.is_empty() {
         out.push(heap.pop().unwrap());
     }
 

@@ -1,0 +1,9 @@
+[package]
+name = "subset_construction"
+version = "0.1.0"
+authors = ["Elías Josué Puma Chávez <elpumitaelias@gmail.com>"]
+
+[dependencies]
+posfixer = { path = "../libs/posfixer/" }
+serde = "1.0.15"
+serde_derive = "1.*"
