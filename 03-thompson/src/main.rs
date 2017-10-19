@@ -1,7 +1,9 @@
 extern crate posfixer;
 
 use posfixer::*;
+use posfixer::TermType::*;
 use std::fmt;
+use std::io::BufRead;
 
 #[derive(Debug)]
 struct Transition {
@@ -70,7 +72,7 @@ fn new_automata(counter: &mut u32, entry: char) -> Automata {
     Automata::new(entry, *counter - 2, *counter - 1)
 }
 
-fn concat(mut auto1: Automata, mut auto2: Automata) -> Automata {    
+fn concat(auto1: Automata, mut auto2: Automata) -> Automata {    
     let expr = auto1.expr + " " + auto2.expr.as_ref() + " .";
     let mut states = auto1.states;
     states.append(&mut auto2.states);
@@ -94,7 +96,7 @@ fn concat(mut auto1: Automata, mut auto2: Automata) -> Automata {
     }
 }
 
-fn alternative(mut auto1: Automata, mut auto2: Automata, counter: &mut u32) -> Automata {
+fn alternative(auto1: Automata, mut auto2: Automata, counter: &mut u32) -> Automata {
     let new_state1 = *counter;
     *counter += 1;
     let new_state2 = *counter;
@@ -114,11 +116,11 @@ fn alternative(mut auto1: Automata, mut auto2: Automata, counter: &mut u32) -> A
     transitions.push(Transition::new(new_state1, 'λ', auto2.initial_state));
 
     for accept in &auto1.accept_states {
-        transitions.push(Transition::new(accept.clone(), 'λ', new_state2));
+        transitions.push(Transition::new(*accept, 'λ', new_state2));
     }
 
     for accept in &auto2.accept_states {
-        transitions.push(Transition::new(accept.clone(), 'λ', new_state2));
+        transitions.push(Transition::new(*accept, 'λ', new_state2));
     }
 
     Automata {
@@ -131,13 +133,86 @@ fn alternative(mut auto1: Automata, mut auto2: Automata, counter: &mut u32) -> A
     }
 }
 
-fn main() {
-    // posfix("../res/infija", "out/posfija");
+fn kleine(auto: Automata, counter: &mut u32) -> Automata {
+    let new_state1 = *counter;
+    *counter += 1;
+    let new_state2 = *counter;
+    *counter += 1;
+
+    let expr = auto.expr + " *";
+    let mut states = auto.states;
+    states.push(new_state1);
+    states.push(new_state2);
+    let mut transitions = auto.transitions;
+
+    for accept in &auto.accept_states {
+        transitions.push(Transition::new(*accept, 'λ', auto.initial_state));
+        transitions.push(Transition::new(*accept, 'λ', new_state2));
+    }
+
+    transitions.push(Transition::new(new_state1, 'λ', auto.initial_state));
+    transitions.push(Transition::new(new_state1, 'λ', new_state2));
+
+    Automata {
+        expr: expr,
+        states: states,
+        initial_state: new_state1,
+        accept_states: vec![new_state2],
+        entries: auto.entries,
+        transitions: transitions
+    }
+}
+
+fn thompson(in_path: &str) {
+    posfix(in_path, "out/posfija");
+    
     let mut counter = 0;
-    let auto = new_automata(&mut counter, 'p');
-    auto.display();
-    let auto2 = new_automata(&mut counter, 'q');
-    auto2.display();
-    // concat(auto, auto2).display();
-    alternative(auto, auto2, &mut counter).display();
+    let posfixed = get_file_buffer("out/posfija");
+    let line = posfixed.lines().next().unwrap().unwrap();
+    let terms: Vec<&str> = line.split_whitespace().collect();
+
+    let mut heap = Vec::new();
+
+    for term in &terms {
+        match eval_term(term) {
+            Number | Variable => {
+                heap.push(new_automata(&mut counter, term.chars().nth(0).unwrap()));
+            }
+            Operator => {
+                match *term {
+                    "*" => {
+                        let autom = kleine(heap.pop().unwrap(), &mut counter);
+                        autom.display();
+                        heap.push(autom);
+                    }
+                    "." => {
+                        let autom2 = heap.pop().unwrap();
+                        let autom1 = heap.pop().unwrap();
+
+                        let autom = concat(autom1, autom2);
+
+                        autom.display();
+                        heap.push(autom);
+                    }
+                    "+" => {
+                        let autom2 = heap.pop().unwrap();
+                        let autom1 = heap.pop().unwrap();
+
+                        let autom = alternative(autom1, autom2, &mut counter);
+
+                        autom.display();
+                        heap.push(autom);
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn main() {
+    // thompson("in/ex01");
+    thompson("in/ex02");
+    // thompson("in/hw03");
 }
