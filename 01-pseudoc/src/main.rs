@@ -13,14 +13,18 @@ fn get_output_file(path: &str) -> File {
 }
 
 fn main() {
+    // Para generar el buffer de lectura del archivo
     let file = get_file_buffer("../res/pseudo.cod");
     let mut output = get_output_file("out/main.cpp");
 
+    // Encabezamiento del archivo de salida
     writeln!(output, "#include <iostream>\nusing namespace std;\n").expect("Error writing in file");
 
+    // Iterador para navegar sobre las líneas del archivo
     let mut line_it = file.lines();
 
     {
+        // Verifica el inicio en el pseudocódigo
         let mut line = line_it.next().unwrap().unwrap();
         if line.find("Inicio").is_some() {
             writeln!(output, "int main() {{").expect("Error writing in file");
@@ -28,6 +32,7 @@ fn main() {
             panic!("Not valid syntax");
         }
 
+        // Después del inicio verificará el keyword "Variables" y procesará las variables dentro
         line = line_it.next().unwrap().unwrap();
         if line.find("Variables").is_some() {
             line = line_it.next().unwrap().unwrap();
@@ -50,6 +55,7 @@ fn main() {
         }
     }
 
+    // Verifica los keywords "Leer", "Escribir" y "Fin" y los procesa adecuadamente
     for line in line_it {
         let line = line.unwrap();
         let statement: Vec<&str> = line.split_whitespace().collect();
