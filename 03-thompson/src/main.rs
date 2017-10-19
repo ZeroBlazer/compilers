@@ -213,6 +213,6 @@ fn thompson(in_path: &str) {
 
 fn main() {
     // thompson("in/ex01");
-    thompson("in/ex02");
-    // thompson("in/hw03");
+    // thompson("in/ex02");
+    thompson("in/hw04");
 }

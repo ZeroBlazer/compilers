@@ -6,7 +6,7 @@ use std::io::BufRead;
 use std::io::Write;
 
 #[derive(Debug)]
-enum TermType {
+pub enum TermType {
     Number,
     Variable,
     LeftGap,
@@ -17,7 +17,7 @@ enum TermType {
 
 use TermType::*;
 
-fn get_file_buffer(path: &str) -> BufReader<File> {
+pub fn get_file_buffer(path: &str) -> BufReader<File> {
     let input = File::open(path).expect("Unable to open");
     BufReader::new(input)
 }
@@ -31,38 +31,47 @@ fn greater_eq_precedence(term1: &str, term2: &String) -> bool {
         true
     } else {
         match term1 {
-            "+" | "-" => {
+            "*" => {
                 match term2.as_ref(): &str {
-                    "+" | "-" => {
+                    "*" => {
                         true
                     }
-                    "*" | "/" => {
-                        true
+                    "." => {
+                        false
+                    }
+                    "+" => {
+                        false
                     }
                     _ => {
                         false
                     }
                 }
             }
-            "*" | "/" => {
+            "." => {
                 match term2.as_ref(): &str {
-                    "+" | "-" => {
-                        false
-                    }
-                    "*" | "/" => {
+                    "*" => {
                         true
+                    }
+                    "." => {
+                        true
+                    }
+                    "+" => {
+                        false
                     }
                     _ => {
                         false
                     }
                 }
             }
-            "=" => {
+            "+" => {
                 match term2.as_ref(): &str {
-                    "+" | "-" => {
+                    "*" => {
                         true
                     }
-                    "*" | "/" => {
+                    "." => {
+                        true
+                    }
+                    "+" => {
                         true
                     }
                     _ => {
@@ -75,10 +84,10 @@ fn greater_eq_precedence(term1: &str, term2: &String) -> bool {
     }
 }
 
-fn eval_term(term: &str) -> TermType {
+pub fn eval_term(term: &str) -> TermType {
     match term.len() {
         0 => Error,
-        1 => if term == "+" || term == "-" || term == "*" || term == "/" || term == "=" {
+        1 => if term == "+" || term == "*" || term == "." {
             Operator
         } else if term == "(" {
             LeftGap
@@ -126,10 +135,7 @@ pub fn posfix(in_path: &str, out_path: &str) -> bool {
     for term in &terms {
         // print!("{:?}: ", eval_term(term));
         match eval_term(term) {
-            Number => {
-                out.push(String::from(*term));
-            }
-            Variable => {
+            Variable | Number => {
                 out.push(String::from(*term));
             }
             LeftGap => {
