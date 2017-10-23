@@ -28,7 +28,7 @@ impl fmt::Display for Transition {
     }
 }
 
-struct Automata {
+struct AutomataFN {
     expr: String,
     states: Vec<u32>,
     initial_state: u32,
@@ -37,9 +37,9 @@ struct Automata {
     transitions: Vec<Transition>
 }
 
-impl Automata {
-    fn new(entry: char, state1: u32, state2: u32) -> Automata {
-        Automata {
+impl AutomataFN {
+    fn new(entry: char, state1: u32, state2: u32) -> AutomataFN {
+        AutomataFN {
             expr: entry.to_string(),
             states: vec![state1, state2],
             initial_state: state1,
@@ -67,12 +67,12 @@ impl Automata {
     }
 }
 
-fn new_automata(counter: &mut u32, entry: char) -> Automata {
+fn new_automata_fn(counter: &mut u32, entry: char) -> AutomataFN {
     *counter += 2;
-    Automata::new(entry, *counter - 2, *counter - 1)
+    AutomataFN::new(entry, *counter - 2, *counter - 1)
 }
 
-fn concat(auto1: Automata, mut auto2: Automata) -> Automata {    
+fn concat(auto1: AutomataFN, mut auto2: AutomataFN) -> AutomataFN {    
     let expr = auto1.expr + " " + auto2.expr.as_ref() + " .";
     let mut states = auto1.states;
     states.append(&mut auto2.states);
@@ -86,7 +86,7 @@ fn concat(auto1: Automata, mut auto2: Automata) -> Automata {
         transitions.push(Transition::new(*accept, 'λ', auto2.initial_state));
     }
 
-    Automata {
+    AutomataFN {
         expr: expr,
         states: states,
         initial_state: auto1.initial_state,
@@ -96,7 +96,7 @@ fn concat(auto1: Automata, mut auto2: Automata) -> Automata {
     }
 }
 
-fn alternative(auto1: Automata, mut auto2: Automata, counter: &mut u32) -> Automata {
+fn alternative(auto1: AutomataFN, mut auto2: AutomataFN, counter: &mut u32) -> AutomataFN {
     let new_state1 = *counter;
     *counter += 1;
     let new_state2 = *counter;
@@ -123,7 +123,7 @@ fn alternative(auto1: Automata, mut auto2: Automata, counter: &mut u32) -> Autom
         transitions.push(Transition::new(*accept, 'λ', new_state2));
     }
 
-    Automata {
+    AutomataFN {
         expr: expr,
         states: states,
         initial_state: new_state1,
@@ -133,7 +133,7 @@ fn alternative(auto1: Automata, mut auto2: Automata, counter: &mut u32) -> Autom
     }
 }
 
-fn kleine(auto: Automata, counter: &mut u32) -> Automata {
+fn kleine(auto: AutomataFN, counter: &mut u32) -> AutomataFN {
     let new_state1 = *counter;
     *counter += 1;
     let new_state2 = *counter;
@@ -153,7 +153,7 @@ fn kleine(auto: Automata, counter: &mut u32) -> Automata {
     transitions.push(Transition::new(new_state1, 'λ', auto.initial_state));
     transitions.push(Transition::new(new_state1, 'λ', new_state2));
 
-    Automata {
+    AutomataFN {
         expr: expr,
         states: states,
         initial_state: new_state1,
@@ -176,7 +176,7 @@ fn thompson(in_path: &str) {
     for term in &terms {
         match eval_term(term) {
             Number | Variable => {
-                heap.push(new_automata(&mut counter, term.chars().nth(0).unwrap()));
+                heap.push(new_automata_fn(&mut counter, term.chars().nth(0).unwrap()));
             }
             Operator => {
                 match *term {
@@ -214,5 +214,5 @@ fn thompson(in_path: &str) {
 fn main() {
     // thompson("in/ex01");
     // thompson("in/ex02");
-    thompson("in/hw04");
+    thompson("in/hw05");
 }
