@@ -65,9 +65,12 @@ pub fn subset_construction(in_path: &str) {
 
     let initial_state = counter;
     counter += 1;
-    // states.insert(initial_state, l_closure(&autom_fn, autom_fn.initial_state));
+    states.insert(initial_state, l_closure(&autom_fn, autom_fn.initial_state));
 
-    println!("{:?}", l_closure_set(&autom_fn, &delta(&autom_fn, &l_closure(&autom_fn, autom_fn.initial_state), 'b')));
+    let l_clos = l_closure(&autom_fn, autom_fn.initial_state);
+
+    println!("{:?}", l_closure_set(&autom_fn, &delta(&autom_fn, &l_clos, 'l')));
+    println!("{:?}", l_closure_set(&autom_fn, &delta(&autom_fn, &l_clos, 'd')));
 
     let autom_fd = AutomataFD {
         expr: autom_fn.expr,
@@ -78,5 +81,5 @@ pub fn subset_construction(in_path: &str) {
         transitions: Vec::new() // autom_fn.transitions
     };
 
-    // println!("{:#?}", autom_fd);
+    println!("{:#?}", autom_fd);
 }

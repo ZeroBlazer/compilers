@@ -201,32 +201,33 @@ pub fn thompson(in_path: &str) -> AutomataFN {
             Number | Variable => {
                 heap.push(new_automata_fn(&mut counter, term.chars().nth(0).unwrap()));
             }
-            Operator => match *term {
-                "*" => {
-                    let autom = kleine(heap.pop().unwrap(), &mut counter);
-                    autom.display();
-                    heap.push(autom);
+            Operator => {
+                match *term {
+                    "*" => {
+                        let autom = kleine(heap.pop().unwrap(), &mut counter);
+
+                        heap.push(autom);
+                    }
+                    "." => {
+                        let autom2 = heap.pop().unwrap();
+                        let autom1 = heap.pop().unwrap();
+
+                        let autom = concat(autom1, autom2);
+
+                        heap.push(autom);
+                    }
+                    "+" => {
+                        let autom2 = heap.pop().unwrap();
+                        let autom1 = heap.pop().unwrap();
+
+                        let autom = alternative(autom1, autom2, &mut counter);
+
+                        heap.push(autom);
+                    }
+                    _ => {}
                 }
-                "." => {
-                    let autom2 = heap.pop().unwrap();
-                    let autom1 = heap.pop().unwrap();
-
-                    let autom = concat(autom1, autom2);
-
-                    autom.display();
-                    heap.push(autom);
-                }
-                "+" => {
-                    let autom2 = heap.pop().unwrap();
-                    let autom1 = heap.pop().unwrap();
-
-                    let autom = alternative(autom1, autom2, &mut counter);
-
-                    autom.display();
-                    heap.push(autom);
-                }
-                _ => {}
-            },
+                // heap.last().unwrap().display();  // DISPLAY AUTOMATA AFTER COMPUTING OPERATOR
+            }
             _ => {}
         }
     }
