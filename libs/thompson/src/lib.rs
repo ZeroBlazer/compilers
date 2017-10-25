@@ -1,18 +1,19 @@
-#[macro_use]
-extern crate serde_derive;
-extern crate serde;
+// #[macro_use]
+// extern crate serde_derive;
+// extern crate serde;
 extern crate posfixer;
 
 use posfixer::*;
 use posfixer::TermType::*;
 use std::fmt;
 use std::io::BufRead;
+use std::collections::BTreeSet;
 
 #[derive(Debug)]
-struct Transition {
-    node_from: u32,
-    trans_sym: char,
-    node_to: u32,
+pub struct Transition {
+    pub node_from: u32,
+    pub trans_sym: char,
+    pub node_to: u32,
 }
 
 impl Transition {
@@ -37,13 +38,14 @@ impl fmt::Display for Transition {
     }
 }
 
-struct AutomataFN {
-    expr: String,
+#[derive(Debug)]
+pub struct AutomataFN {
+    pub expr: String,
     states: Vec<u32>,
-    initial_state: u32,
+    pub initial_state: u32,
     accept_states: Vec<u32>,
-    entries: Vec<char>,
-    transitions: Vec<Transition>,
+    pub entries: BTreeSet<char>,
+    pub transitions: Vec<Transition>,
 }
 
 impl AutomataFN {
@@ -53,7 +55,7 @@ impl AutomataFN {
             states: vec![state1, state2],
             initial_state: state1,
             accept_states: vec![state2],
-            entries: vec![entry],
+            entries: [entry].iter().cloned().collect(),
             transitions: vec![Transition::new(state1, entry, state2)],
         }
     }
@@ -82,6 +84,10 @@ impl AutomataFN {
         }
         println!("=======================================");
     }
+
+    // pub fn transitions(&self) -> &[Transition] {
+    //     &self.transitions[..]
+    // }
 }
 
 fn new_automata_fn(counter: &mut u32, entry: char) -> AutomataFN {
@@ -180,7 +186,7 @@ fn kleine(auto: AutomataFN, counter: &mut u32) -> AutomataFN {
     }
 }
 
-pub fn thompson(in_path: &str) {
+pub fn thompson(in_path: &str) -> AutomataFN {
     posfix(in_path, "../res/out/posfija");
 
     let mut counter = 0;
@@ -224,4 +230,7 @@ pub fn thompson(in_path: &str) {
             _ => {}
         }
     }
+
+    // println!("{:#?}", heap)
+    heap.pop().unwrap()
 }

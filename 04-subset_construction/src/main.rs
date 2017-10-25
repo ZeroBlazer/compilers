@@ -1,7 +1,7 @@
-extern crate thompson;
+extern crate subset_const;
 
-use thompson::*;
+use subset_const::*;
 
 fn main() {
-    thompson("../res/in/hw05");
+    subset_construction("../res/in/ex03");
 }

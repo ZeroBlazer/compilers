@@ -4,4 +4,4 @@ version = "0.1.0"
 authors = ["Elías Josué Puma Chávez <elpumitaelias@gmail.com>"]
 
 [dependencies]
-thompson = { path = "../libs/thompson/" }
+subset_const = { path = "../libs/subset_construction/" }
