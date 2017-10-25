@@ -9,7 +9,7 @@ use std::fmt;
 use std::io::BufRead;
 use std::collections::BTreeSet;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Transition {
     pub node_from: u32,
     pub trans_sym: char,
@@ -38,7 +38,7 @@ impl fmt::Display for Transition {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AutomataFN {
     pub expr: String,
     states: Vec<u32>,
@@ -60,7 +60,7 @@ impl AutomataFN {
         }
     }
 
-    fn display(&self) {
+    pub fn display(&self) {
         println!("\nEXPRESIÓN: {}", self.expr);
         println!(
             "ESTADOS:\n{:?}\n---------------------------------------",

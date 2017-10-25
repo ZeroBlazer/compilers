@@ -58,28 +58,72 @@ pub struct AutomataFD {
     pub transitions: Vec<Transition>,
 }
 
+impl AutomataFD {
+    pub fn display(&self) {
+        println!("\nEXPRESIÓN: {}", self.expr);
+        println!("ESTADOS:");
+        for (state, eq_states) in &self.states {
+            println!("{}: {:?}", state, eq_states);
+        }
+        println!("---------------------------------------");
+        println!(
+            "INICIAL:\n{}\n---------------------------------------",
+            &self.initial_state
+        );
+        println!(
+            "ACEPTACIÓN:\n{:?}\n---------------------------------------",
+            &self.accept_states
+        );
+        println!(
+            "ENTRIES:\n{:?}\n---------------------------------------",
+            &self.entries
+        );
+        println!("TRANSICIONES:");
+        for trans in &self.transitions {
+            println!("{}", trans);
+        }
+        println!("=======================================");
+    }
+}
+
 pub fn subset_construction(in_path: &str) {
     let autom_fn = thompson(in_path);
-    let mut counter = 0;
-    let mut states = BTreeMap::new();
+    let mut counter = 1;
+    let mut marked_states = BTreeMap::new();
+    let mut dfa_states = BTreeMap::new();
 
     let initial_state = counter;
     counter += 1;
-    states.insert(initial_state, l_closure(&autom_fn, autom_fn.initial_state));
 
-    let l_clos = l_closure(&autom_fn, autom_fn.initial_state);
+    autom_fn.display();
 
-    println!("{:?}", l_closure_set(&autom_fn, &delta(&autom_fn, &l_clos, 'l')));
-    println!("{:?}", l_closure_set(&autom_fn, &delta(&autom_fn, &l_clos, 'd')));
+    let initial_dfa_state = l_closure(&autom_fn, autom_fn.initial_state);
+    // println!("Initial: {:?}", initial_dfa_state);
+    marked_states.insert(initial_dfa_state.clone(), false);
+    dfa_states.insert(initial_state, initial_dfa_state);
+
+    loop {
+        if 
+    }
+    // for entry in &autom_fn.entries {
+    //     let l_clos = l_closure(&autom_fn, autom_fn.initial_state);
+    //     let delta_p = l_closure_set(&autom_fn, &delta(&autom_fn, &l_clos, *entry));
+    //     if !delta_p.is_empty() && !marked_states.contains(&delta_p) {
+    //         marked_states.insert(delta_p.clone());
+    //         dfa_states.insert(counter, delta_p);
+    //         counter += 1;
+    //     }
+    //     println!("States: {:?}", marked_states);
+    // }
 
     let autom_fd = AutomataFD {
         expr: autom_fn.expr,
-        states: states,
+        states: dfa_states,
         initial_state: initial_state,
         accept_states: vec![1, 2],
         entries: autom_fn.entries,
-        transitions: Vec::new() // autom_fn.transitions
+        transitions: Vec::new(), // autom_fn.transitions
     };
 
-    println!("{:#?}", autom_fd);
+    autom_fd.display();
 }
