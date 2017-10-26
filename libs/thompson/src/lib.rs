@@ -17,7 +17,7 @@ pub struct Transition {
 }
 
 impl Transition {
-    fn new(node_from: u32, trans_sym: char, node_to: u32) -> Transition {
+    pub fn new(node_from: u32, trans_sym: char, node_to: u32) -> Transition {
         Transition {
             node_from: node_from,
             trans_sym: trans_sym,
@@ -43,7 +43,7 @@ pub struct AutomataFN {
     pub expr: String,
     states: Vec<u32>,
     pub initial_state: u32,
-    accept_states: Vec<u32>,
+    pub accept_states: Vec<u32>,
     pub entries: BTreeSet<char>,
     pub transitions: Vec<Transition>,
 }
@@ -61,7 +61,8 @@ impl AutomataFN {
     }
 
     pub fn display(&self) {
-        println!("\nEXPRESIÓN: {}", self.expr);
+        println!("\n==================AFN==================");
+        println!("EXPRESIÓN: {}", self.expr);
         println!(
             "ESTADOS:\n{:?}\n---------------------------------------",
             &self.states
