@@ -1,0 +1,11 @@
+[root]
+name = "scanner"
+version = "0.1.0"
+dependencies = [
+ "token_scanner 0.1.0",
+]
+
+[[package]]
+name = "token_scanner"
+version = "0.1.0"
+

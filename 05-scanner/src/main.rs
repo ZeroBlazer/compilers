@@ -1,3 +1,7 @@
+extern crate token_scanner;
+
+use token_scanner::*;
+
 fn main() {
-    println!("Hello, world!");
+    token_scanner("../res/in/hw05_01");
 }
