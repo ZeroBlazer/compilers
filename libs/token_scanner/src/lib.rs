@@ -58,58 +58,68 @@ pub fn token_scanner(path: &str) {
     let mut lexema = String::new();
     let mut it = buffer.chars();
 
-    let mut new_token_type = Undef;
+    let mut token_type = Undef;
 
     loop {
         if let Some(Ok(c)) = it.next() {
             if !c.is_whitespace() {
-                match new_token_type {
-                    Undef => {
-                        lexema.push(c);
-                        new_token_type = get_token_type(&lexema);
-                    }
+                let mut do_flush = false;
+
+                match token_type {
+                    Undef => {}
                     NUM => {
                         if !c.is_digit(10) {
-                            show_token(&new_token_type, &lexema);
-                            lexema.clear();
-                            new_token_type = Undef;
+                            do_flush = true;
                         }
-                        lexema.push(c);
+                    }
+                    ID => {
+                        if !c.is_alphanumeric() {
+                            do_flush = true;
+                        }
                     }
                     Mayor | Menor => {
-                        if c == '=' {
-                            lexema.push(c);
-                            new_token_type = get_token_type(&lexema);
+                        if c != '=' {
+                            do_flush = true;
                         }
-                        show_token(&new_token_type, &lexema);
-                        lexema.clear();
-                        lexema.push(c);
-                        new_token_type = Undef;
+                    }
+                    WHILE | IF => {
+                        if c.is_alphanumeric() {
+                            token_type = ID;
+                        } else {
+                            do_flush = true;
+                        }
                     }
                     _ => {
-                        let prev_token_type = new_token_type;
-                        lexema.push(c);
-                        new_token_type = get_token_type(&lexema);
+                        let mut lexema2 = lexema.clone();
+                        lexema2.push(c);
+                        let new_token_type = get_token_type(&lexema2);
 
-                        if prev_token_type != new_token_type {
-                            show_token(&new_token_type, &lexema);
-                            lexema.clear();
+                        if new_token_type != token_type {
+                            do_flush = true;
                         }
                     }
                 }
-            } else {
-                if !lexema.is_empty() {
-                    show_token(&new_token_type, &lexema);
+
+                if do_flush {
+                    show_token(&token_type, &lexema);
                     lexema.clear();
                 }
 
-                println!("[ ]");
-                new_token_type = Undef;
+                lexema.push(c);
+                token_type = get_token_type(&lexema);
+            } else {
+                if !lexema.is_empty() {
+                    show_token(&token_type, &lexema);
+                    lexema.clear();
+                }
+                token_type = Undef;
+                println!("-");
             }
         } else {
             break;
         }
     }
 
-    println!("{}", lexema);
+    show_token(&token_type, &lexema);
+    lexema.clear();
 }
