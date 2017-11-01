@@ -5,3 +5,9 @@ x = if 12 + while13 - 14*wqe/81;
 // y = 31;
 /*x = y != z;
 Ireallythoughtyouwereonmyside*/
+while true {
+    let a[] = vec![0; 20];
+    let (x, y) = (0, 1);
+    let string = "abdssfsdfsd";
+    string.string().append("lololol");
+}

@@ -26,13 +26,14 @@ pub enum TokenType {
     LineComment,
     LeftBlockComment,
     RightBlockComment,
-    LeftGap,
-    RightGap,
-    LeftGap,
-    RightGap,
-    LeftGap,
-    RightGap,
-    Undef
+    LeftParentheses,
+    RightParentheses,
+    LeftBracket,
+    RightBracket,
+    LeftBrace,
+    RightBrace,
+    DoubleQuote,
+    Undef,
 }
 
 use TokenType::*;
@@ -76,6 +77,20 @@ fn get_token_type(c: &str) -> TokenType {
         Igualdad
     } else if c == "!=" {
         Diferencia
+    } else if c == "(" {
+        LeftParentheses
+    } else if c == ")" {
+        RightParentheses
+    } else if c == "[" {
+        LeftBracket
+    } else if c == "]" {
+        RightBracket
+    } else if c == "{" {
+        LeftBrace
+    } else if c == "}" {
+        RightBrace
+    } else if c == "\"" {
+        DoubleQuote
     } else if c == "//" {
         LineComment
     } else if c == "/*" {
@@ -110,10 +125,10 @@ pub fn token_scanner(path: &str) {
                     Division => do_flush = c != '/' && c != '*',
                     LineComment | LeftBlockComment => in_comment = true,
                     WHILE | IF => if c.is_alphanumeric() {
-                                        token_type = ID;
-                                    } else {
-                                        do_flush = true;
-                                    },
+                        token_type = ID;
+                    } else {
+                        do_flush = true;
+                    },
                     _ => {
                         let mut lexema2 = lexema.clone();
                         lexema2.push(c);
@@ -158,15 +173,15 @@ pub fn token_scanner(path: &str) {
                         lexema.clear();
                         token_type = Undef;
                     }
-                    // match token_type {
-                    //     LineComment => if 10 == c as u32{
-                    //         in_comment = false;
-                    //         show_token(&token_type, &lexema);
-                    //         lexema.clear();
-                    //         token_type = Undef;
-                    //     },
-                    //     _ => {}
-                    // }
+                // match token_type {
+                //     LineComment => if 10 == c as u32{
+                //         in_comment = false;
+                //         show_token(&token_type, &lexema);
+                //         lexema.clear();
+                //         token_type = Undef;
+                //     },
+                //     _ => {}
+                // }
                 } else {
                     if !lexema.is_empty() {
                         show_token(&token_type, &lexema);
@@ -174,7 +189,6 @@ pub fn token_scanner(path: &str) {
                     }
 
                     token_type = Undef;
-                    // println!("-");
                 }
             }
         } else {
