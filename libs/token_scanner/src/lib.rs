@@ -11,17 +11,27 @@ pub enum TokenType {
     IF,
     NUM,
     Mas,
+    Menos,
+    Multiplicacion,
+    Division,
+    Asignacion,
     PuntoYComa,
+    Negacion,
     Mayor,
     MayorIgual,
     Menor,
     MenorIgual,
+    Igualdad,
+    Diferencia,
+    LineComment,
+    LeftBlockComment,
+    RightBlockComment,
     Undef
 }
 
 use TokenType::*;
 
-fn show_token(token_type: &TokenType, lexema: &String) {
+fn show_token(token_type: &TokenType, lexema: &str) {
     println!("Token = {:?} [{}]", token_type, lexema);
 }
 
@@ -36,8 +46,18 @@ fn get_token_type(c: &str) -> TokenType {
         IF
     } else if c == "+" {
         Mas
+    } else if c == "-" {
+        Menos
+    } else if c == "*" {
+        Multiplicacion
+    } else if c == "/" {
+        Division
+    } else if c == "=" {
+        Asignacion
     } else if c == ";" {
         PuntoYComa
+    } else if c == "!" {
+        Negacion
     } else if c == "<" {
         Menor
     } else if c == "<=" {
@@ -46,6 +66,16 @@ fn get_token_type(c: &str) -> TokenType {
         Mayor
     } else if c == ">=" {
         MayorIgual
+    } else if c == "==" {
+        Igualdad
+    } else if c == "!=" {
+        Diferencia
+    } else if c == "//" {
+        LineComment
+    } else if c == "/*" {
+        LeftBlockComment
+    } else if c == "*/" {
+        RightBlockComment
     } else {
         ID
     }
@@ -59,6 +89,7 @@ pub fn token_scanner(path: &str) {
     let mut it = buffer.chars();
 
     let mut token_type = Undef;
+    let mut in_comment = false;
 
     loop {
         if let Some(Ok(c)) = it.next() {
@@ -67,36 +98,22 @@ pub fn token_scanner(path: &str) {
 
                 match token_type {
                     Undef => {}
-                    NUM => {
-                        if !c.is_digit(10) {
-                            do_flush = true;
-                        }
-                    }
-                    ID => {
-                        if !c.is_alphanumeric() {
-                            do_flush = true;
-                        }
-                    }
-                    Mayor | Menor => {
-                        if c != '=' {
-                            do_flush = true;
-                        }
-                    }
-                    WHILE | IF => {
-                        if c.is_alphanumeric() {
-                            token_type = ID;
-                        } else {
-                            do_flush = true;
-                        }
-                    }
+                    NUM => do_flush = !c.is_digit(10),
+                    ID => do_flush = !c.is_alphanumeric(),
+                    Mayor | Menor | Asignacion | Negacion => do_flush = c != '=',
+                    Division => do_flush = c != '/' && c != '*',
+                    LineComment | LeftBlockComment => in_comment = true,
+                    WHILE | IF => if c.is_alphanumeric() {
+                                        token_type = ID;
+                                    } else {
+                                        do_flush = true;
+                                    },
                     _ => {
                         let mut lexema2 = lexema.clone();
                         lexema2.push(c);
                         let new_token_type = get_token_type(&lexema2);
 
-                        if new_token_type != token_type {
-                            do_flush = true;
-                        }
+                        do_flush = new_token_type != token_type;
                     }
                 }
 
@@ -105,15 +122,54 @@ pub fn token_scanner(path: &str) {
                     lexema.clear();
                 }
 
-                lexema.push(c);
-                token_type = get_token_type(&lexema);
-            } else {
-                if !lexema.is_empty() {
-                    show_token(&token_type, &lexema);
-                    lexema.clear();
+                if !in_comment {
+                    lexema.push(c);
+                    token_type = get_token_type(&lexema);
+                } else if token_type == LeftBlockComment {
+                    if lexema.is_empty() {
+                        if c == '*' {
+                            lexema.push(c);
+                        }
+                    } else {
+                        lexema.push(c);
+                        if get_token_type(&lexema) == RightBlockComment {
+                            in_comment = false;
+                            show_token(&token_type, &"/*");
+                            token_type = RightBlockComment;
+                        } else {
+                            lexema.clear();
+                        }
+                    }
                 }
-                token_type = Undef;
-                println!("-");
+
+            } else {
+                in_comment = token_type == LineComment || token_type == LeftBlockComment;
+
+                if in_comment {
+                    if token_type == LineComment && c as u8 == 10 {
+                        in_comment = false;
+                        show_token(&token_type, &lexema);
+                        lexema.clear();
+                        token_type = Undef;
+                    }
+                    // match token_type {
+                    //     LineComment => if 10 == c as u32{
+                    //         in_comment = false;
+                    //         show_token(&token_type, &lexema);
+                    //         lexema.clear();
+                    //         token_type = Undef;
+                    //     },
+                    //     _ => {}
+                    // }
+                } else {
+                    if !lexema.is_empty() {
+                        show_token(&token_type, &lexema);
+                        lexema.clear();
+                    }
+
+                    token_type = Undef;
+                    // println!("-");
+                }
             }
         } else {
             break;
