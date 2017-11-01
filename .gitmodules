@@ -7,3 +7,6 @@
 [submodule "docs/03-report"]
 	path = docs/03-report
 	url = https://git.overleaf.com/11697398cdfwrtnfjkxw
+[submodule "docs/04-report"]
+	path = docs/04-report
+	url = https://git.overleaf.com/11821942dwgzkmnqgccs

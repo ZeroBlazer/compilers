@@ -26,6 +26,12 @@ pub enum TokenType {
     LineComment,
     LeftBlockComment,
     RightBlockComment,
+    LeftGap,
+    RightGap,
+    LeftGap,
+    RightGap,
+    LeftGap,
+    RightGap,
     Undef
 }
 
