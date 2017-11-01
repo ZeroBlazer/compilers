@@ -2,12 +2,12 @@
 /* ab == cb;
 bc!=d;*/
 x = if 12 + while13 - 14*wqe/81;
-// y = 31;
+string.string().append("lololol");
+let (x, y) = (0, 1);
 /*x = y != z;
-Ireallythoughtyouwereonmyside*/
+qwertyuiopasdfghjkl*/
 while true {
+    // y = 31;
     let a[] = vec![0; 20];
-    let (x, y) = (0, 1);
     let string = "abdssfsdfsd";
-    string.string().append("lololol");
 }
