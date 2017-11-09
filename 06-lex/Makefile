@@ -2,13 +2,20 @@ CC = gcc
 CFLAGS = -Wall
 LIBS = -lfl
 
-EXEC = scanner
-OBJS = lex.yy
+EXECS = scanner
+OBJS = lex.yy.c
 
-all: ${EXEC}
+all: ${EXECS}
 
-lex.yy:
+lex.yy.c: tokens.l
 	lex tokens.l
 
-scanner:
-	${CC} 
+scanner: lex.yy.c
+	${CC} ${CFLAGS} -o scanner ${OBJS} ${LIBS}
+
+run: all
+	./scanner
+
+clean:
+	rm -f ${EXECS} ${OBJS}
+	@echo "all cleaned up!"
