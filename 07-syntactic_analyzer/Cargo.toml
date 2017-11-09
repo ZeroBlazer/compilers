@@ -1,0 +1,6 @@
+[package]
+name = "syntactic_analyzer"
+version = "0.1.0"
+authors = ["Elías Josué Puma Chávez <elpumitaelias@gmail.com>"]
+
+[dependencies]
