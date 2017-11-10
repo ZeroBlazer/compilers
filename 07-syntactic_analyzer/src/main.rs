@@ -1,4 +1,7 @@
+extern crate ansi_term;
+
 use std::io::{stdin, BufRead};
+use ansi_term::Colour::*;
 
 fn get_input() -> String {
     let mut buffer = String::new();
@@ -10,86 +13,96 @@ fn get_input() -> String {
     buffer
 }
 
-// fn s_rule(input_chars: &mut std::str::Chars) {
-//     let mut get_char = || {
-//         input_chars.next().unwrap()
-//     };
-
-//     let mut preanalisis = get_char();
-//     //***************Closures***************//
-//     let error = || {
-//         println!("Error de Sintáxis");
-//     };
-
-//     // let mut parea = |t| {
-//     //     if preanalisis == t {
-//     //         preanalisis = get_char();
-//     //     } else {
-//     //         error();
-//     //     }
-//     // };
-
-//     if preanalisis == 'x' {
-//         s_rule(input_chars);
-//     }
-// }
-
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 enum States {
     S,
     A,
     B,
+    C,
     Error,
-    Ok
+    Ok,
 }
 
 use States::*;
 
-fn eval(input_chars: &mut std::str::Chars) {
+fn eval(input: &str) {
+    let mut col = 1;
+    let mut input_chars = input.chars();
     let mut get_char = || input_chars.next().unwrap();
 
     let mut preanalisis = get_char();
     let mut curr_state = S;
+    let mut next_state = (Error, Error);
 
-    for _ in 0..5 {
-        // println!("{:?}: {}", curr_state, preanalisis);
+    while { input.len() - col > 0 } {
+        // println!(">> {:?}: {}", curr_state, preanalisis);
+
         match curr_state {
             S => if preanalisis == 'x' {
                 preanalisis = get_char();
+                col += 1;
                 curr_state = S;
             } else if preanalisis == 'a' {
                 curr_state = A;
             } else {
                 curr_state = Error;
+                next_state = (S, B);
             },
             A => if preanalisis == 'a' {
                 preanalisis = get_char();
+                col += 1;
                 curr_state = B;
             } else {
                 curr_state = Error;
+                next_state = (A, B);
             },
             B => if preanalisis == 'b' {
                 preanalisis = get_char();
-                if preanalisis == 'c' {
-                    curr_state = Ok;
-                } else {
-                    curr_state = Error;
-                }
+                col += 1;
+                curr_state = C;
             } else {
-                curr_state = Error
+                curr_state = Error;
+                next_state = (B, C);
+            },
+            C => if preanalisis == 'c' {
+                curr_state = Ok;
+            } else {
+                curr_state = Error;
+                next_state = (C, Error);
             },
             Error => {
-                println!("Error de sintáxis");
-                println!("En columna: {}", input_chars
+                print!("\n{}", Red.bold().paint("Error de sintáxis"));
+                println!(": {:?} >> {:?}", next_state, curr_state);
+                print!("{}", Blue.bold().paint(format!("  En columna {}, el caracter '{}' debería ser: ", col, preanalisis)));
+
+                match next_state.0 {
+                    S => println!("{}", Yellow.bold().paint("'x'/'a'")),
+                    A => println!("{}", Yellow.bold().paint("'a'")),
+                    B => println!("{}", Yellow.bold().paint("'b'")),
+                    C => println!("{}", Yellow.bold().paint("'c'")),
+                    _ => {
+                        println!("{}", Yellow.bold().paint("''"));
+                        break;
+                    }
+                }
+
+                curr_state = next_state.1.clone();
+                preanalisis = get_char();
+                col += 1;
             }
-            Ok => println!("Success!"),
+            Ok => {
+                println!("{}", Green.bold().italic().paint("Success!"));
+                break;
+            }
         }
+    }
+
+    if curr_state != Ok {
+        println!("\n{}: Patrón sin terminar", Red.bold().paint("Error de sintáxis"));
     }
 }
 
 fn main() {
     let input = get_input();
-
-    let mut preanalisis = input.chars();
-    eval(&mut preanalisis);
+    eval(&input);
 }

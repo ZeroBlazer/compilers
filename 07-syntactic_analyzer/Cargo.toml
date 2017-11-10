@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Elías Josué Puma Chávez <elpumitaelias@gmail.com>"]
 
 [dependencies]
+ansi_term = "0.10.2"
