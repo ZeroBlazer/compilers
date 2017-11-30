@@ -104,5 +104,7 @@ fn eval(input: &str) {
 
 fn main() {
     let input = get_input();
+    input.trim();
+    println!("'{}'", input);
     eval(&input);
 }
