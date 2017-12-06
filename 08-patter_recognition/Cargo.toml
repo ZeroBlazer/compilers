@@ -1,6 +1,0 @@
-[package]
-name = "patter_recognition"
-version = "0.1.0"
-authors = ["Elias J. Puma <elpumitaelias@gmail.com>"]
-
-[dependencies]
