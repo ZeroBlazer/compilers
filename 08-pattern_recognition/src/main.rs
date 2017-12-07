@@ -16,40 +16,59 @@ use std::collections::btree_map::Entry::Vacant;
 
 // use State::*;
 
-fn main() {
-    let path = "../res/in/hw08_01";
-    let input = File::open(path).expect("Unable to open");
-    let buffer = BufReader::new(input);
-
-    let pattern = "1101";
-    let transtitions = ['0', '1'];
+fn get_matrix(pattern: &str, transitions: &[char]) -> BTreeMap<usize, BTreeMap<char, usize>> {
     let n_states = pattern.len() + 1;
 
     let mut matrix: BTreeMap<usize, BTreeMap<char, usize>> = BTreeMap::new();
 
-    // (0..n_states).for_each(|x| {
-    //     matrix.insert(x, BTreeMap::new());
-    // });
-
-    let initial_trans = pattern.chars().nth(0).unwrap();
+    let init_trans = pattern.chars().nth(0).unwrap();
+    let mut break_pos = 1;
+    {
+        let mut prev_char = pattern.chars().nth(0).unwrap();
+        for c in pattern.chars().skip(1) {
+            if c != prev_char {
+                break;
+            } else {
+                break_pos += 1;
+            }
+        }
+    }
 
     (0..n_states).for_each(|state| {
-        let inputs = matrix.entry(state).or_insert(BTreeMap::new());
-        
+        let inputs = matrix.entry(state).or_insert_with(BTreeMap::new);
+        let pro_trans = pattern.chars().nth(if state != n_states - 1 { state } else { state - 1 }).unwrap(); // Progress trans
+
         if state != n_states - 1 {
-            inputs.insert(pattern.chars().nth(state).unwrap(), state + 1);
+            inputs.insert(pro_trans, state + 1);
+            if state == break_pos {
+                transitions.iter().filter(|t| **t != pro_trans).for_each(|t| {
+                    inputs.insert(*t, break_pos);
+                });
+            }
+        } else {
+            if pro_trans == init_trans {
+                inputs.insert(pro_trans, break_pos);
+            }
         }
 
-        transtitions.iter().for_each(|t| {
-            inputs.entry(*t).or_insert(if *t == initial_trans {
-                matrix[&0][&initial_trans]
-            } else {
-                0
-            });
-        });
+        transitions
+            .iter()
+            .for_each(|t| { inputs.entry(*t).or_insert(0); });
     });
 
     println!("{:#?}", matrix);
+    matrix
+}
+
+fn main() {
+    // let path = "../res/in/hw08_01";
+    // let input = File::open(path).expect("Unable to open");
+    // let buffer = BufReader::new(input);
+
+    let pattern = "1101";
+    let transitions = ['0', '1'];
+    
+    let matrix = get_matrix(pattern, &transitions);
 
     let mut counter = 0;
     // let current_state = 0;
@@ -60,7 +79,7 @@ fn main() {
     //     // println!("'{}'", c);
 
     //     // match counter {
-            
+
     //     // }
     // }
 
