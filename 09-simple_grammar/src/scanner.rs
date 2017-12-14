@@ -1,7 +1,4 @@
-use std::fs::File;
-use std::io::BufReader;
-// use std::io::BufRead;
-use std::io::Read;
+use std::collections::VecDeque;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
@@ -35,10 +32,12 @@ pub enum TokenType {
     Undef,
 }
 
-use TokenType::*;
+use self::TokenType::*;
 
-fn show_token(token_type: &TokenType, lexema: &str) {
-    println!("Token = {:?} [{}]", token_type, lexema);
+fn accum_token<'a>(accum: &mut VecDeque<(TokenType, String)>, token_type: &TokenType, lexema: &String) {
+// fn accum_token(token_type: &TokenType, lexema: &str) {
+    // println!("Token = {:?} [{}]", token_type, lexema);
+    accum.push_back((token_type.clone(), lexema.clone()));
 }
 
 fn get_token_type(c: &str) -> TokenType {
@@ -101,18 +100,17 @@ fn get_token_type(c: &str) -> TokenType {
     }
 }
 
-pub fn token_scanner(path: &str) {
-    let input = File::open(path).expect("Unable to open");
-    let buffer = BufReader::new(input);
-
+pub fn token_scanner(buffer: &str) -> VecDeque<(TokenType, String)> {
     let mut lexema = String::new();
     let mut it = buffer.chars();
 
     let mut token_type = Undef;
     let mut in_comment = false;
 
+    let mut accum: VecDeque<(TokenType, String)> = VecDeque::new();
+
     loop {
-        if let Some(Ok(c)) = it.next() {
+        if let Some(c) = it.next() {
             if !c.is_whitespace() {
                 let mut do_flush = false;
 
@@ -138,7 +136,7 @@ pub fn token_scanner(path: &str) {
                 }
 
                 if do_flush {
-                    show_token(&token_type, &lexema);
+                    accum_token(&mut accum, &token_type, &lexema);
                     lexema.clear();
                 }
 
@@ -154,7 +152,7 @@ pub fn token_scanner(path: &str) {
                         lexema.push(c);
                         if get_token_type(&lexema) == RightBlockComment {
                             in_comment = false;
-                            show_token(&token_type, &"/*");
+                            accum_token(&mut accum, &token_type, &"/*".to_string());
                             token_type = RightBlockComment;
                         } else {
                             lexema.clear();
@@ -168,14 +166,14 @@ pub fn token_scanner(path: &str) {
                 if in_comment {
                     if token_type == LineComment && c as u8 == 10 {
                         in_comment = false;
-                        show_token(&token_type, &lexema);
+                        accum_token(&mut accum, &token_type, &lexema);
                         lexema.clear();
                         token_type = Undef;
                     }
                 // match token_type {
                 //     LineComment => if 10 == c as u32{
                 //         in_comment = false;
-                //         show_token(&token_type, &lexema);
+                //         accum_token(&token_type, &lexema);
                 //         lexema.clear();
                 //         token_type = Undef;
                 //     },
@@ -183,7 +181,7 @@ pub fn token_scanner(path: &str) {
                 // }
                 } else {
                     if !lexema.is_empty() {
-                        show_token(&token_type, &lexema);
+                        accum_token(&mut accum, &token_type, &lexema);
                         lexema.clear();
                     }
 
@@ -195,6 +193,8 @@ pub fn token_scanner(path: &str) {
         }
     }
 
-    show_token(&token_type, &lexema);
+    accum_token(&mut accum, &token_type, &lexema);
     lexema.clear();
+
+    accum
 }
