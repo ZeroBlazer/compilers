@@ -34,10 +34,10 @@ pub enum TokenType {
 
 use self::TokenType::*;
 
-fn accum_token<'a>(accum: &mut VecDeque<(TokenType, String)>, token_type: &TokenType, lexema: &String) {
-// fn accum_token(token_type: &TokenType, lexema: &str) {
+fn accum_token(accum: &mut VecDeque<(TokenType, String)>, token_type: &TokenType, lexema: &str) {
+    // fn accum_token(token_type: &TokenType, lexema: &str) {
     // println!("Token = {:?} [{}]", token_type, lexema);
-    accum.push_back((token_type.clone(), lexema.clone()));
+    accum.push_back((token_type.clone(), lexema.to_string()));
 }
 
 fn get_token_type(c: &str) -> TokenType {
@@ -102,94 +102,86 @@ fn get_token_type(c: &str) -> TokenType {
 
 pub fn token_scanner(buffer: &str) -> VecDeque<(TokenType, String)> {
     let mut lexema = String::new();
-    let mut it = buffer.chars();
-
     let mut token_type = Undef;
     let mut in_comment = false;
-
     let mut accum: VecDeque<(TokenType, String)> = VecDeque::new();
 
-    loop {
-        if let Some(c) = it.next() {
-            if !c.is_whitespace() {
-                let mut do_flush = false;
+    for c in buffer.chars() {
+        if !c.is_whitespace() {
+            let mut do_flush = false;
 
-                match token_type {
-                    Undef => {}
-                    NUM => do_flush = !c.is_digit(10),
-                    ID => do_flush = !c.is_alphanumeric(),
-                    Mayor | Menor | Asignacion | Negacion => do_flush = c != '=',
-                    Division => do_flush = c != '/' && c != '*',
-                    LineComment | LeftBlockComment => in_comment = true,
-                    WHILE | IF => if c.is_alphanumeric() {
-                        token_type = ID;
+            match token_type {
+                Undef => {}
+                NUM => do_flush = !c.is_digit(10),
+                ID => do_flush = !c.is_alphanumeric(),
+                Mayor | Menor | Asignacion | Negacion => do_flush = c != '=',
+                Division => do_flush = c != '/' && c != '*',
+                LineComment | LeftBlockComment => in_comment = true,
+                WHILE | IF => if c.is_alphanumeric() {
+                    token_type = ID;
+                } else {
+                    do_flush = true;
+                },
+                _ => {
+                    let mut lexema2 = lexema.clone();
+                    lexema2.push(c);
+                    let new_token_type = get_token_type(&lexema2);
+
+                    do_flush = new_token_type != token_type;
+                }
+            }
+
+            if do_flush {
+                accum_token(&mut accum, &token_type, &lexema);
+                lexema.clear();
+            }
+
+            if !in_comment {
+                lexema.push(c);
+                token_type = get_token_type(&lexema);
+            } else if token_type == LeftBlockComment {
+                if lexema.is_empty() {
+                    if c == '*' {
+                        lexema.push(c);
+                    }
+                } else {
+                    lexema.push(c);
+                    if get_token_type(&lexema) == RightBlockComment {
+                        in_comment = false;
+                        accum_token(&mut accum, &token_type, &"/*".to_string());
+                        token_type = RightBlockComment;
                     } else {
-                        do_flush = true;
-                    },
-                    _ => {
-                        let mut lexema2 = lexema.clone();
-                        lexema2.push(c);
-                        let new_token_type = get_token_type(&lexema2);
-
-                        do_flush = new_token_type != token_type;
+                        lexema.clear();
                     }
                 }
+            }
+        } else {
+            in_comment = token_type == LineComment || token_type == LeftBlockComment;
 
-                if do_flush {
+            if in_comment {
+                if token_type == LineComment && c as u8 == 10 {
+                    in_comment = false;
+                    accum_token(&mut accum, &token_type, &lexema);
+                    lexema.clear();
+                    token_type = Undef;
+                }
+            // match token_type {
+            //     LineComment => if 10 == c as u32{
+            //         in_comment = false;
+            //         accum_token(&token_type, &lexema);
+            //         lexema.clear();
+            //         token_type = Undef;
+            //     },
+            //     _ => {}
+            // }
+            } else {
+                if !lexema.is_empty() {
                     accum_token(&mut accum, &token_type, &lexema);
                     lexema.clear();
                 }
 
-                if !in_comment {
-                    lexema.push(c);
-                    token_type = get_token_type(&lexema);
-                } else if token_type == LeftBlockComment {
-                    if lexema.is_empty() {
-                        if c == '*' {
-                            lexema.push(c);
-                        }
-                    } else {
-                        lexema.push(c);
-                        if get_token_type(&lexema) == RightBlockComment {
-                            in_comment = false;
-                            accum_token(&mut accum, &token_type, &"/*".to_string());
-                            token_type = RightBlockComment;
-                        } else {
-                            lexema.clear();
-                        }
-                    }
-                }
-
-            } else {
-                in_comment = token_type == LineComment || token_type == LeftBlockComment;
-
-                if in_comment {
-                    if token_type == LineComment && c as u8 == 10 {
-                        in_comment = false;
-                        accum_token(&mut accum, &token_type, &lexema);
-                        lexema.clear();
-                        token_type = Undef;
-                    }
-                // match token_type {
-                //     LineComment => if 10 == c as u32{
-                //         in_comment = false;
-                //         accum_token(&token_type, &lexema);
-                //         lexema.clear();
-                //         token_type = Undef;
-                //     },
-                //     _ => {}
-                // }
-                } else {
-                    if !lexema.is_empty() {
-                        accum_token(&mut accum, &token_type, &lexema);
-                        lexema.clear();
-                    }
-
-                    token_type = Undef;
-                }
+                token_type = Undef;
             }
-        } else {
-            break;
         }
     }
 

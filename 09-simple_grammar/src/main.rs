@@ -51,7 +51,7 @@ fn main() {
 	// let input = "9 + 5 - 3";
 	let input = "41333 + 553 + 321 - 6546 -654 +31654 -654645 -954654 65465";
 
-	let tokens = scanner::token_scanner(&input);
+	let tokens = scanner::token_scanner(input);
 	
 	if eval_exp(tokens) {
 		println!("\nExpresión correcta");
