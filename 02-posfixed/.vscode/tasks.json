@@ -6,6 +6,7 @@
     },
     "tasks": [
         {
+            "useWSL": true,
             "taskName": "cargo build",
             "type": "shell",
             "command": "cargo",

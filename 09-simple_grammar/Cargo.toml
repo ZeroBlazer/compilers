@@ -1,0 +1,6 @@
+[package]
+name = "simple_grammar"
+version = "0.1.0"
+authors = ["Elias Puma <elpumitaelias@gmail.com>"]
+
+[dependencies]
