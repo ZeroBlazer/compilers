@@ -12,7 +12,7 @@ fn eval_exp(tokens: VecDeque<(TokenType, String)>) -> bool {
 			tokens.is_empty()
 		} else {
 			false
-		} 
+		}
 	} else {
 		false
 	}
